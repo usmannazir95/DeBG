@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Checkerboard — "transparent / no background" -->
+    <!-- Checkerboard ("transparent / no background") -->
     <pattern id="cb" x="0" y="0" width="36" height="36" patternUnits="userSpaceOnUse">
       <rect width="36" height="36" fill="#141927"/>
       <rect x="0"  y="0"  width="18" height="18" fill="#1c2840"/>
@@ -47,7 +47,7 @@
          mask="url(#bgHoles)" punches the letter shapes out so checker shows through. -->
     <rect width="512" height="512" fill="#0b0d12" mask="url(#bgHoles)"/>
 
-    <!-- 4. "De" — solid white, sits above the BG line -->
+    <!-- 4. "De" solid white, sits above the BG line -->
     <text
       x="256" y="198"
       text-anchor="middle"
@@ -58,7 +58,7 @@
       fill="#f1f5ff"
     >De</text>
 
-    <!-- 5. "BG" — hollow outline only; the gradient stroke gives it color,
+    <!-- 5. "BG" hollow outline only; the gradient stroke gives it color,
          the interior is transparent so the checker from step 2 shows through. -->
     <text
       x="256" y="390"

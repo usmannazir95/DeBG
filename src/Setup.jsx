@@ -7,7 +7,7 @@ const BACKENDS = [
     label: 'CPU',
     icon: '🖥',
     title: 'CPU (recommended)',
-    desc: 'Works on any Windows machine. ~2–10 s per image depending on model.',
+    desc: 'Works on any Windows machine. ~2-10 s per image depending on model.',
     note: null,
   },
   {
@@ -15,8 +15,8 @@ const BACKENDS = [
     label: 'GPU',
     icon: '⚡',
     title: 'NVIDIA GPU (CUDA)',
-    desc: 'Requires an NVIDIA GPU with CUDA 11.8+. ~0.2–1 s per image.',
-    note: 'If you are unsure, choose CPU — rembg will still work.',
+    desc: 'Requires an NVIDIA GPU with CUDA 11.8+. ~0.2-1 s per image.',
+    note: 'If you are unsure, choose CPU. rembg will still work.',
   },
 ];
 
@@ -34,7 +34,7 @@ export default function Setup({ onComplete }) {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
 
-  // Step 0: check system — runs findPython() in the main process
+  // Step 0: check system - runs findPython() in the main process
   useEffect(() => {
     (async () => {
       if (!window.electronAPI) { setPhase('select'); return; }
@@ -98,7 +98,7 @@ export default function Setup({ onComplete }) {
             <div className="setup-logo-icon">⚗</div>
             <div>
               <h1>DeBG</h1>
-              <p className="setup-sub">First-time setup — takes 5–10 minutes</p>
+              <p className="setup-sub">First-time setup - takes 5-10 minutes</p>
             </div>
           </div>
 
@@ -113,12 +113,12 @@ export default function Setup({ onComplete }) {
           {pythonFound ? (
             <div className="setup-info-row ok">
               <span>✓</span>
-              <span>Python {pythonFound.version} found — no download needed.</span>
+              <span>Python {pythonFound.version} found. No download needed.</span>
             </div>
           ) : (
             <div className="setup-info-row warn">
               <span>⚠</span>
-              <span>Python 3.11–3.13 not found — installer will download Python 3.12 (~27 MB).</span>
+              <span>Python 3.11-3.13 not found. Installer will download Python 3.12 (~27 MB).</span>
             </div>
           )}
 
@@ -194,7 +194,7 @@ export default function Setup({ onComplete }) {
           <h1>Setup complete!</h1>
           <p className="setup-sub">
             rembg is installed and ready. AI models download automatically on first use
-            (~43 MB – 375 MB depending on model chosen).
+            (~43 MB to 375 MB depending on model chosen).
           </p>
           <button className="setup-btn-primary" onClick={handleDone}>
             Open app →

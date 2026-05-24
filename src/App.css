@@ -58,6 +58,80 @@ h1 {
 .server-pill.ok .server-dot { animation: pulse 2s ease-in-out infinite; }
 @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 
+/* Starting variant */
+.server-pill.starting {
+  background: rgba(99,102,241,0.1);
+  color: #c0c4ff;
+  border-color: rgba(99,102,241,0.3);
+}
+.server-pill.starting .server-dot { animation: pulse 1.4s ease-in-out infinite; }
+
+/* ---------- Server startup banner ---------- */
+.startup-banner {
+  background: var(--panel);
+  border: 1px solid rgba(99,102,241,0.3);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.startup-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.startup-spinner {
+  width: 18px; height: 18px; flex-shrink: 0;
+  border: 2px solid rgba(99,102,241,0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+}
+
+.startup-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.startup-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c0c4ff;
+}
+
+.startup-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.startup-track {
+  height: 3px;
+  background: rgba(99,102,241,0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.startup-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4f46e5, #818cf8);
+  border-radius: 2px;
+  animation: startup-grow 60s linear forwards;
+}
+
+@keyframes startup-grow {
+  0%   { width:  5%; }
+  8%   { width: 28%; }
+  20%  { width: 54%; }
+  40%  { width: 72%; }
+  65%  { width: 83%; }
+  100% { width: 91%; }
+}
+
 /* ---------- Controls ---------- */
 .controls {
   background: var(--panel);
@@ -478,14 +552,14 @@ footer {
 /* Gallery layout variants                                                     */
 /* ========================================================================== */
 
-/* Large grid — same as original */
+/* Large grid (same as original) */
 .gallery.gallery-grid-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 12px;
 }
 
-/* Small grid — just the result thumb */
+/* Small grid (result thumb only) */
 .gallery.gallery-grid-small {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));

@@ -12,7 +12,7 @@ const SERVER_URL  = `http://127.0.0.1:${SERVER_PORT}`;
 const PAGE_SIZE   = 24;
 
 const MODELS = [
-  { id: 'birefnet-general',   label: 'BiRefNet General',  hint: 'Best quality — any subject',        dl: '~375 MB' },
+  { id: 'birefnet-general',   label: 'BiRefNet General',  hint: 'Best quality, any subject',         dl: '~375 MB' },
   { id: 'birefnet-portrait',  label: 'BiRefNet Portrait', hint: 'Best for people & hair',            dl: '~375 MB' },
   { id: 'bria-rmbg',          label: 'BRIA RMBG',         hint: 'E-commerce / advertising quality',  dl: '~176 MB' },
   { id: 'isnet-general-use',  label: 'ISNet General',     hint: 'Fast + high accuracy',              dl: '~176 MB' },
@@ -20,7 +20,7 @@ const MODELS = [
   { id: 'u2net_human_seg',    label: 'U²Net Human',       hint: 'Specialized for people',            dl: '~176 MB' },
   { id: 'silueta',            label: 'Silueta',           hint: 'Compact & fast (43 MB)',            dl: '~43 MB'  },
   { id: 'isnet-anime',        label: 'ISNet Anime',       hint: 'Anime & illustrations',             dl: '~176 MB' },
-  { id: 'u2netp',             label: 'U²Net Lite',        hint: 'Smallest — fastest inference',      dl: '~4.7 MB' },
+  { id: 'u2netp',             label: 'U²Net Lite',        hint: 'Smallest, fastest inference',       dl: '~4.7 MB' },
 ];
 
 const ACCEPTED = ['image/png', 'image/jpeg', 'image/webp', 'image/bmp'];
@@ -88,7 +88,7 @@ function CompareSlider({ original, result }) {
         </div>
       )}
 
-      {/* Divider + knob — only shown when both images are present */}
+      {/* Divider + knob - only shown when both images are present */}
       {result && (
         <div className="compare-handle" style={{ left: `${split}%` }}>
           <div className="compare-line" />
@@ -112,7 +112,9 @@ export default function App() {
   const [items,    setItems]    = useState([]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [status,   setStatus]   = useState({ phase: 'idle', msg: 'Ready.' });
-  const [serverOk, setServerOk] = useState(false);
+  const [serverOk,       setServerOk]       = useState(false);
+  const [serverStarting, setServerStarting] = useState(true);   // true until first connect or error
+  const [startupSlow,    setStartupSlow]    = useState(false);  // true after 45 s without connect
   const [downloading,     setDownloading]     = useState(false);
   const [modelDownloading, setModelDownloading] = useState(false);
   const [showSwitch, setShowSwitch] = useState(false);
@@ -242,28 +244,38 @@ export default function App() {
   // -------------------------------------------------------------------------
 
   useEffect(() => {
+    // In browser dev mode there is no startup phase
+    if (!window.electronAPI) setServerStarting(false);
+
+    const markReady = () => { setServerOk(true); setServerStarting(false); };
+    const markError = () => { setServerOk(false); setServerStarting(false); };
+
     const check = async () => {
       try {
         await fetch(`${SERVER_URL}/`, { signal: AbortSignal.timeout(2000) });
-        setServerOk(true);
+        markReady();
       } catch {
         setServerOk(false);
       }
     };
 
     if (window.electronAPI) {
-      window.electronAPI.onServerReady(() => setServerOk(true));
-      window.electronAPI.onServerError(() => setServerOk(false));
+      window.electronAPI.onServerReady(markReady);
+      window.electronAPI.onServerError(markError);
       window.electronAPI.getConfig().then(c => {
         setConfig(c || {});
         if (c?.outputFolder) setOutputFolder(c.outputFolder);
       });
     }
 
+    // After 45 s without connecting, show a "still loading" sub-message
+    const slowTimer = setTimeout(() => setStartupSlow(true), 45_000);
+
     check();
     const id = setInterval(check, 6000);
     return () => {
       clearInterval(id);
+      clearTimeout(slowTimer);
       window.electronAPI?.removeServerListeners();
     };
   }, []);
@@ -362,7 +374,7 @@ export default function App() {
 
         if (!isCached) {
           setModelDownloading(true);
-          setStatus({ phase: 'processing', msg: `Downloading ${modelInfo?.label} model (${modelInfo?.dl}) — first use, please wait…` });
+          setStatus({ phase: 'processing', msg: `Downloading ${modelInfo?.label} model (${modelInfo?.dl}) - first use, please wait...` });
         }
 
         const { maskBlob, width, height } = await fetchMask(item, model, settings.alphaMatte);
@@ -541,20 +553,40 @@ export default function App() {
       <header>
         <div className="title-row">
           <h1>DeBG</h1>
-          <div className={`server-pill ${serverOk ? 'ok' : 'off'}`}>
+          <div className={`server-pill ${serverOk ? 'ok' : serverStarting ? 'starting' : 'off'}`}>
             <span className="server-dot" />
-            {serverOk ? 'Server ready' : 'Server connecting…'}
+            {serverOk ? 'Server ready' : serverStarting ? 'Starting up...' : 'Server offline'}
           </div>
-          {!serverOk && window.electronAPI && (
+          {!serverOk && !serverStarting && window.electronAPI && (
             <button className="btn btn-ghost small" onClick={() => window.electronAPI.restartServer()}>
               Reconnect
             </button>
           )}
         </div>
         <p className="sub">
-          Powered by <strong>rembg</strong> running locally — no internet needed after first model download.
+          Powered by <strong>rembg</strong> running locally. No internet needed after first model download.
         </p>
       </header>
+
+      {/* ---- Server startup banner ---- */}
+      {serverStarting && (
+        <div className="startup-banner">
+          <div className="startup-top">
+            <div className="startup-spinner" />
+            <div className="startup-text">
+              <span className="startup-title">Starting rembg server...</span>
+              <span className="startup-sub">
+                {startupSlow
+                  ? 'Still loading - can take up to a minute on slower machines.'
+                  : 'Usually ready in 10-20 seconds. The app will unlock automatically.'}
+              </span>
+            </div>
+          </div>
+          <div className="startup-track">
+            <div className="startup-fill" />
+          </div>
+        </div>
+      )}
 
       {/* ---- Model picker ---- */}
       <section className="controls">
@@ -597,14 +629,14 @@ export default function App() {
           )}
         </div>
 
-        {/* Output folder bar — Electron only */}
+        {/* Output folder bar - Electron only */}
         {window.electronAPI && (
           <div className="output-bar">
             <span className="output-bar-label">Output</span>
             {outputFolder ? (
               <span className="output-path" title={outputFolder}>{outputFolder}</span>
             ) : (
-              <span className="output-none">No folder set — results not saved to disk</span>
+              <span className="output-none">No folder set. Results not auto-saved to disk</span>
             )}
             <div className="output-bar-btns">
               {outputFolder && (
@@ -624,7 +656,7 @@ export default function App() {
       {/* ---- Backend switch panel ---- */}
       {showSwitch && (
         <section className="switch-panel">
-          <p className="switch-title">Switch compute backend (reinstalls rembg — takes a few minutes)</p>
+          <p className="switch-title">Switch compute backend (reinstalls rembg - takes a few minutes)</p>
           <div className="switch-row">
             {['cpu', 'gpu'].map(b => (
               <button key={b} className={`chip-sm ${config.backend === b ? 'chip-active' : ''}`}
@@ -661,7 +693,7 @@ export default function App() {
             </div>
             <input type="range" min={0} max={20} step={1} value={settings.feather}
               onChange={e => updateSetting('feather', parseInt(e.target.value))} />
-            <div className="setting-hint">Softens edges — good for hair and fur</div>
+            <div className="setting-hint">Softens edges - good for hair and fur</div>
           </div>
 
           <div className="setting">
@@ -707,7 +739,7 @@ export default function App() {
                 {settings.alphaMatte ? '✓ Enabled' : 'Disabled'}
               </button>
             </div>
-            <div className="setting-hint">rembg alpha matting — much better hair/fur edges (slower)</div>
+            <div className="setting-hint">rembg alpha matting - much better hair/fur edges (slower)</div>
           </div>
         </div>
       </section>
@@ -719,7 +751,7 @@ export default function App() {
         <div className="dropzone-inner">
           <div className="drop-icon">＋</div>
           <div><strong>Drop images here</strong> or click to browse</div>
-          <div className="drop-sub">PNG · JPG · WEBP · BMP — multiple files at once</div>
+          <div className="drop-sub">PNG · JPG · WEBP · BMP - multiple files at once</div>
         </div>
       </section>
 
@@ -933,7 +965,7 @@ export default function App() {
                     ? (modelDownloading ? '⬇ Downloading model for first use…' : '⏳ Processing…')
                     : lightboxItem.status === 'error'
                       ? `✕ Error: ${lightboxItem.error}`
-                      : 'Not processed yet — click Remove backgrounds to generate result.'}
+                      : 'Not processed yet. Click Remove backgrounds to generate result.'}
                 </div>
               </div>
             )}
@@ -947,7 +979,7 @@ export default function App() {
           {' · '}
           <a href="https://huggingface.co/briaai/RMBG-1.4" target="_blank" rel="noreferrer">briaai/RMBG-1.4</a>
         </span>
-        <span>DeBG — local, private, no uploads</span>
+        <span>DeBG - local, private, no uploads</span>
       </footer>
     </div>
   );

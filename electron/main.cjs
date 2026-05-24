@@ -64,7 +64,7 @@ function startServer(config) {
   const rembgExe = getRembgExe(config.venvPath || VENV_PATH());
   if (!existsSync(rembgExe)) {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('server:error', { msg: 'rembg executable not found — please re-run setup.' });
+      mainWindow.webContents.send('server:error', { msg: 'rembg executable not found. Please re-run setup.' });
     }
     return;
   }
@@ -73,7 +73,7 @@ function startServer(config) {
 
   rembgProcess = spawn(rembgExe, ['s', '--host', '127.0.0.1', '--port', String(SERVER_PORT), '--no-ui'], {
     windowsHide: true,
-    env: { ...process.env, U2NET_HOME: MODELS_PATH() },
+    env: { ...process.env, U2NET_HOME: MODELS_PATH(), BROWSER: 'nul' },
   });
 
   rembgProcess.stdout.on('data', (d) => console.log('[rembg]', d.toString().trim()));
@@ -186,8 +186,8 @@ ipcMain.handle('setup:run', async (event, backend) => {
   };
 
   try {
-    // Step 1 – Python
-    send({ step: 1, type: 'status', msg: 'Checking for Python 3.11–3.13…' });
+    // Step 1 - Python
+    send({ step: 1, type: 'status', msg: 'Checking for Python 3.11-3.13...' });
     let pythonInfo = findPython();
 
     if (!pythonInfo) {
@@ -200,13 +200,13 @@ ipcMain.handle('setup:run', async (event, backend) => {
 
     await saveConfig({ pythonPath: pythonInfo.path });
 
-    // Step 2 – Venv
+    // Step 2 - Venv
     const venvPath = VENV_PATH();
     send({ step: 2, type: 'status', msg: 'Setting up virtual environment…' });
     await createVenv(pythonInfo.path, venvPath, (p) => send({ step: 2, ...p }));
     await saveConfig({ venvPath });
 
-    // Step 3 – rembg
+    // Step 3 - rembg
     send({ step: 3, type: 'status', msg: `Installing rembg[${backend},cli]…` });
     await installRembg(venvPath, backend, (p) => send({ step: 3, ...p }));
     await saveConfig({ setupComplete: true, backend });
@@ -307,7 +307,7 @@ ipcMain.handle('output:pick-folder', async () => {
 
 ipcMain.handle('output:save-file', async (_, { folder, filename, buffer }) => {
   await mkdir(folder, { recursive: true });
-  // Avoid overwriting — append numeric suffix if the file already exists
+  // Avoid overwriting - append numeric suffix if the file already exists
   let dest = path.join(folder, filename);
   if (existsSync(dest)) {
     const ext  = path.extname(filename);

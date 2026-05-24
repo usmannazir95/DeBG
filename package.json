@@ -1,8 +1,8 @@
 {
   "name": "debg",
   "productName": "DeBG",
-  "version": "0.2.0",
-  "description": "Remove image backgrounds locally — no uploads, no API keys, no cloud.",
+  "version": "0.2.1",
+  "description": "Remove image backgrounds locally. No uploads, no API keys, no cloud.",
   "author": "usmannazir95",
   "license": "MIT",
   "type": "module",

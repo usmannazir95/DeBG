@@ -1,5 +1,5 @@
 /**
- * Post-processing worker — no model inference here.
+ * Post-processing worker. No model inference here.
  * Receives a grayscale mask PNG from the rembg server (om=true)
  * plus the original image blob, applies threshold / feather / morph,
  * composites according to outputMode, and returns the final PNG.

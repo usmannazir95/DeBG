@@ -1,5 +1,5 @@
 /**
- * Setup helpers — all Node.js / child-process operations.
+ * Setup helpers - all Node.js / child-process operations.
  * Called from main.cjs IPC handlers; never runs in the renderer.
  */
 const { execSync, spawn } = require('child_process');
@@ -90,7 +90,7 @@ function tryGetPythonVersion(cmd) {
 
 async function downloadFile(url, dest, onProgress) {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Download failed: HTTP ${res.status} — ${url}`);
+  if (!res.ok) throw new Error(`Download failed: HTTP ${res.status} - ${url}`);
 
   const total = parseInt(res.headers.get('content-length') || '0', 10);
   let received = 0;
@@ -157,7 +157,7 @@ async function createVenv(pythonPath, venvPath, onProgress) {
 }
 
 async function installRembg(venvPath, backend, onProgress) {
-  // Use "python -m pip" — calling pip.exe directly fails on Windows when upgrading
+  // Use "python -m pip" - calling pip.exe directly fails on Windows when upgrading
   // pip itself because the running executable is locked.
   const python = path.join(venvPath, 'Scripts', 'python.exe');
   const pkg = `rembg[${backend},cli]`;
@@ -167,7 +167,7 @@ async function installRembg(venvPath, backend, onProgress) {
     onData: (d) => onProgress({ type: 'pip', msg: d }),
   });
 
-  onProgress({ type: 'status', msg: `Installing ${pkg} — this may take several minutes…` });
+  onProgress({ type: 'status', msg: `Installing ${pkg} - this may take a few minutes...` });
   await runProcess(python, ['-m', 'pip', 'install', pkg, '--no-cache-dir'], {
     onData: (d) => onProgress({ type: 'pip', msg: d }),
   });
